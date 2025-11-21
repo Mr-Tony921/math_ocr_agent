@@ -1,0 +1,5 @@
+__pycache__/
+infer_result*.json
+evaluation_result*.json
+*.log
+*.o
