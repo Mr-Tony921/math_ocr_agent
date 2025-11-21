@@ -85,7 +85,7 @@ def process_item(content_json, output_file):
     return [result_json]
 
 if __name__ == "__main__":
-    os.environ["OPENAI_API_KEY"] = "5b2cec881cccf499887845abc06d3c17"
+    os.environ["OPENAI_API_KEY"] = ""
 
     input_file = "/mnt/afs/tongronglei/code/judge_data/test_ocr/output.json"
 

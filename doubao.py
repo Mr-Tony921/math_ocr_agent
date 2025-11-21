@@ -47,5 +47,5 @@ def test_all_models():
             print("Error response:", result)
 
 if __name__ == "__main__":
-    os.environ["OPENAI_API_KEY"] = "5b2cec881cccf499887845abc06d3c17"
+    os.environ["OPENAI_API_KEY"] = ""
     test_all_models()

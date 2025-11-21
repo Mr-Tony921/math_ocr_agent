@@ -48,7 +48,7 @@ def find_files_with_prefix(folder, prefix):
     return result
 
 def main():
-    os.environ["OPENAI_API_KEY"] = "5b2cec881cccf499887845abc06d3c17"
+    os.environ["OPENAI_API_KEY"] = ""
 
     question_dir = "/mnt/afs/tongronglei/code/judge_data/test_ocr/ocr_agent/images/Q_8/"
 
@@ -71,7 +71,7 @@ def main():
         print(llm_output['data']['response_content']['choices'][0]['message']['reasoning_content'])
 
 # def main():
-#     os.environ["OPENAI_API_KEY"] = "5b2cec881cccf499887845abc06d3c17"
+#     os.environ["OPENAI_API_KEY"] = ""
 
 #     parent_dir = "/mnt/afs/tongronglei/code/judge_data/test_ocr/ocr_agent/images/"
 
