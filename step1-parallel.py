@@ -15,7 +15,21 @@ from mimetypes import guess_type
 # Configuration for number of threads
 NUM_THREADS = 40  # You can change this to control the number of threads
 
-output_file = "./infer_result-doubao16-merge-v1612-3.json"
+output_file = "./infer_result-doubao-merge-v1612-9.json"
+
+def extract_tag(tag_name, xml_str):
+    pattern = r'<{0}>(.*?)</{0}>'.format(tag_name)
+    match = re.search(pattern, xml_str, re.DOTALL)
+    return match.group(1).strip() if match else None
+
+def replace_tag_content(text: str, tag: str, new_content: str) -> str:
+    pattern = rf"(<{tag}>)(.*?)(</{tag}>)"
+
+    def repl(match):
+        return match.group(1) + new_content + match.group(3)
+
+    return re.sub(pattern, repl, text, count=1, flags=re.DOTALL)
+
 
 def local_image_to_data_url(image_path):
     """将本地图片文件转换为Base64编码的data URL。"""
@@ -47,15 +61,38 @@ def process_item(content_json, output_file):
 
     image_data_url = local_image_to_data_url(block_image)
     # merge = vision_prompt.format(full_result=block)
-    merge = vision_prompt.format(full_result=block, block_prompt=block_prompt)
+    # merge = vision_prompt.format(full_result=block, block_prompt=block_prompt)
+    st_question = extract_tag("st_question", block)
+    st_answer = extract_tag("st_answer", block)
+    st_final_answer = extract_tag("st_final_answer", block)
+    total_slots = 0
+    answered_slots = 0
+    if st_final_answer:
+        parts = re.split(r"[;；]", st_final_answer)
+        parts = [p.strip() for p in parts]
+        total_slots = len(parts)
+        answered_slots = sum(1 for p in parts if p != "")
+    ocr_result = f"<st_question>{st_question}</st_question>\n<st_answer>{st_answer}</st_answer>\n<st_final_answer>{st_final_answer}</st_final_answer>"
+    merge = vision_prompt.format(full_result=ocr_result, block_prompt=block_prompt, total_slots=total_slots, answered_slots=answered_slots)
+
     content = [
         {"type": "image_url", "image_url": {"url": image_data_url}},
         {"type": "text", "text": merge}
     ]
     messages = [{"role": "user", "content": content}]
-    success, llm_output = generate_with_proxy(messages, "doubao-Seed-1.6-vision-250815")
+    success, llm_output = generate_with_proxy(messages)
     if success:
-        parsed_result = parse_model_output(llm_output['data']['response_content']['choices'][0]['message']['content'])
+        tmp = parse_model_output(llm_output['data']['response_content']['choices'][0]['message']['content'])
+        st_question = extract_tag("st_question", tmp)
+        st_answer = extract_tag("st_answer", tmp)
+        st_final_answer = extract_tag("st_final_answer", tmp)
+        parsed_result = block
+        if st_question:
+            parsed_result = replace_tag_content(parsed_result, "st_question", st_question)
+        if st_answer:
+            parsed_result = replace_tag_content(parsed_result, "st_answer", st_answer)
+        if st_final_answer:
+            parsed_result = replace_tag_content(parsed_result, "st_final_answer", st_final_answer)
     else:
         parsed_result = ""
 

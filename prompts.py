@@ -1,23 +1,98 @@
-# P3 94.24 89.39 97.29 93.23 90.41
+# 带作答区域数量
 vision_prompt = """
-你是视觉模型 OCR 校准专家。请先根据图片内容理解题目和学生书写，生成各字段初步 OCR 识别结果，格式参考 block_prompt：
+你是视觉模型 OCR 校准专家。
 
+你的任务：
+1. 先根据图片内容理解题目与学生书写，生成各字段初步 OCR 内容（仅用于校准，不直接输出）。字段格式参考 block_prompt：
 {block_prompt}
 
-然后结合用户提供的完整结果（full_result）进行校准：
-- <st_question>：OCR 识别题干，必须忠实反映图片内容。
-- <st_answer> 和 <st_final_answer>：OCR 识别学生答案，清晰可读的内容优先，必要时参考 full_result 校正。
-- 其他字段（<st_question_title>、<st_question_pure_content>、<st_question_id>、<st_question_type> 等）：如发现明显错误可修正，否则偏向相信 full_result。
+2. 再基于以下 full_result 以及作答数量信息对 <st_question>、<st_answer>、<st_final_answer> 三个字段进行校准：
+full_result:
+{full_result}
 
-输入：
-- full_result: {full_result}
+作答信息：
+- total_slots: {total_slots}  # 题目总作答区域数量（包括空白）
+- answered_slots: {answered_slots}  # 学生实际填写数量
 
-要求：
-1. 输出格式必须与 full_result 完全一致；
-2. 不破坏任何 tag 或结构，只修改其中的内容；
-3. 忠实还原图片中 OCR 的真实信息，避免盲目纠正为正确答案；
-4. 最终输出仅包含更新后的完整 full_result。
+校准规则：
+1. <st_question>：
+   - 不得混入学生答案。
+   - 内容以 full_result 为主，仅在明显看到字符/数字/符号 OCR 错误时才修正。
+   - 不要重写题干或增加/减少内容。
+
+2. <st_answer> 与 <st_final_answer>：
+   - 校准后的答案应总共包含 total_slots 段，每段对应一个作答区域。
+   - 已填写的 answered_slots 段，尽量保持图片中可识别的内容，并修正 OCR 错误。
+   - 剩余空白段应严格保留，不得填充或编造内容。
+   - 不得随意增加或减少作答区域数量。
+
+3. 严格禁止：
+   - 改变 tag 结构或新增/删除字段；
+   - 将图片中不存在的内容写入 full_result；
+   - 根据题意推断正确答案。
+
+最终输出要求：
+- 输出格式必须与输入 full_result 完全一致；
+- 仅修改 <st_question>、<st_answer>、<st_final_answer> 三个字段内容；
+- 不输出任何解释、过程或分析；
+- 最终输出仅包含更新后的完整 full_result。
 """
+
+# 优化空白幻觉
+# vision_prompt = """
+# 你是视觉模型 OCR 校准专家。
+
+# 你的任务：
+# 1. 先根据图片内容理解题目与学生书写，生成各字段初步 OCR 内容（仅用于校准，不直接输出）。字段格式参考 block_prompt：
+# {block_prompt}
+
+# 2. 再基于以下 full_result 对 <st_question>、<st_answer>、<st_final_answer> 三个字段进行校准：
+# full_result:
+# {full_result}
+
+# 校准规则：
+# 1. <st_question>：
+#    - 不得混入学生答案。
+#    - 内容以 full_result 为主，仅在明显看到某个字符/数字/符号被错误 OCR 时才修正。
+#    - 除非模型非常确定图片内容与 full_result 不一致，否则不要大幅重写。
+
+# 2. <st_answer> 与 <st_final_answer>：
+#    - 若某段为空、缺失或被遮挡，必须相信 full_result，不要补齐或编造。
+#    - 对于图片中明显可辨认的字符/数字/公式，允许进行纠正。
+#    - 不得根据题意推理正确答案，不得填补模型想象内容。
+
+# 3. 严格禁止：
+#    - 改变 tag 结构或新增删除字段；
+#    - 将图片不存在的内容写入 full_result；
+#    - 根据题意自动纠正为“标准答案”。
+
+# 最终输出要求：
+# - 输出格式必须与输入 full_result 完全一致；
+# - 仅修改 <st_question>、<st_answer>、<st_final_answer> 三个字段内容；
+# - 不输出任何解释、过程、分析；
+# - 最终输出仅包含更新后的完整 full_result。
+# """
+
+# P3 94.24 89.39 97.29 93.23 90.41
+# vision_prompt = """
+# 你是视觉模型 OCR 校准专家。请先根据图片内容理解题目和学生书写，生成各字段初步 OCR 识别结果，格式参考 block_prompt：
+
+# {block_prompt}
+
+# 然后结合用户提供的完整结果（full_result）进行校准：
+# - <st_question>：OCR 识别题干，必须忠实反映图片内容。
+# - <st_answer> 和 <st_final_answer>：OCR 识别学生答案，清晰可读的内容优先，必要时参考 full_result 校正。
+# - 其他字段（<st_question_title>、<st_question_pure_content>、<st_question_id>、<st_question_type> 等）：如发现明显错误可修正，否则偏向相信 full_result。
+
+# 输入：
+# - full_result: {full_result}
+
+# 要求：
+# 1. 输出格式必须与 full_result 完全一致；
+# 2. 不破坏任何 tag 或结构，只修改其中的内容；
+# 3. 忠实还原图片中 OCR 的真实信息，避免盲目纠正为正确答案；
+# 4. 最终输出仅包含更新后的完整 full_result。
+# """
 
 # 志强测试用例表格使用
 # vision_prompt = """
