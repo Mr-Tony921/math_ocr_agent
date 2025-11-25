@@ -9,27 +9,12 @@ import os
 
 from prompts import vision_prompt, block_prompt
 from internvl import process_sample
-from doubao import generate_with_proxy
-from mimetypes import guess_type
+from glm import generate_with_proxy
 
 # Configuration for number of threads
-NUM_THREADS = 40  # You can change this to control the number of threads
+NUM_THREADS = 10  # You can change this to control the number of threads
 
-output_file = "./infer_result-doubao16-merge-v1612-3.json"
-
-def local_image_to_data_url(image_path):
-    """将本地图片文件转换为Base64编码的data URL。"""
-    # 根据文件扩展名猜测MIME类型
-    mime_type, _ = guess_type(image_path)
-    if mime_type is None:
-        mime_type = 'application/octet-stream'  # 如果找不到，则使用默认值
-
-    # 读取并编码图片文件
-    with open(image_path, "rb") as image_file:
-        base64_encoded_data = base64.b64encode(image_file.read()).decode('utf-8')
-
-    # 构建data URL
-    return f"data:{mime_type};base64,{base64_encoded_data}"
+output_file = "./infer_result-glm-merge-v1612-3.json"
 
 def parse_model_output(text: str) -> str:
     """
@@ -45,19 +30,9 @@ def process_item(content_json, output_file):
     block_image = current_data['image_path']
     block = process_sample(block_image, block_prompt)
 
-    image_data_url = local_image_to_data_url(block_image)
-    # merge = vision_prompt.format(full_result=block)
+
     merge = vision_prompt.format(full_result=block, block_prompt=block_prompt)
-    content = [
-        {"type": "image_url", "image_url": {"url": image_data_url}},
-        {"type": "text", "text": merge}
-    ]
-    messages = [{"role": "user", "content": content}]
-    success, llm_output = generate_with_proxy(messages, "doubao-Seed-1.6-vision-250815")
-    if success:
-        parsed_result = parse_model_output(llm_output['data']['response_content']['choices'][0]['message']['content'])
-    else:
-        parsed_result = ""
+    parsed_result = generate_with_proxy(block_image, merge)
 
     ref = current_data.get('ref_answer', '')  # 安全获取参考答案
         
@@ -85,6 +60,8 @@ def process_item(content_json, output_file):
     return [result_json]
 
 if __name__ == "__main__":
+    os.environ["OPENAI_API_KEY"] = ""
+
     input_file = "/mnt/afs/tongronglei/code/judge_data/test_ocr/output.json"
 
     # 清空输出文件

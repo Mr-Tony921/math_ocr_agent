@@ -6,6 +6,7 @@ import getpass
 SUPPORTED_MODELS = [
     "doubao-1.5-thinking-vision-pro-250428",
     "doubao-seed-1.6-250615",
+    "doubao-Seed-1.6-vision-250815"
 ]
 
 def generate_with_proxy(messages, model="doubao-seed-1.6-250615"):
@@ -47,5 +48,4 @@ def test_all_models():
             print("Error response:", result)
 
 if __name__ == "__main__":
-    os.environ["OPENAI_API_KEY"] = ""
     test_all_models()

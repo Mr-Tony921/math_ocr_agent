@@ -14,7 +14,7 @@ from PIL import Image
 # 配置常量
 CONFIG = {
     "API_ENDPOINTS": {
-        "test": ["http://10.119.16.170:8000/generate"]
+        "test": ["http://10.119.29.79:8000/generate"]
     },
     "SYSTEM_PROMPTS": {
         "common": "你是商汤科技开发的日日新多模态大模型，英文名叫Sensechat，是一个有用无害的人工智能助手。",
