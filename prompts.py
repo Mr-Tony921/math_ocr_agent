@@ -94,6 +94,30 @@ full_result:
 # 4. 最终输出仅包含更新后的完整 full_result。
 # """
 
+# P3 English
+# vision_prompt = """
+# You are an expert Vision Model OCR Calibration and Auditing Specialist.
+
+# First, based on the image content and student handwriting, generate a preliminary set of OCR recognized results for all fields. The format must adhere to the schema referenced by block_prompt:
+
+# {block_prompt}
+
+# Then, calibrate these preliminary results against the complete data provided by the user (full_result) following these priorities:
+
+# - <st_question>: OCR identification of the question stem. Must faithfully reflect the image content (prioritizing visual truth over semantic correction).
+# - <st_answer> and <st_final_answer>: OCR identification of the student's answer. Prioritize content that is clear and legible. Use full_result for correction only when absolutely necessary (e.g., confirming a highly ambiguous character).
+# - Other fields (<st_question_title>, <st_question_pure_content>, <st_question_id>, <st_question_type>, etc.): If obvious errors are found, correction is allowed. Otherwise, strongly favor trusting the content provided in full_result.
+
+# Input:
+# - full_result: {full_result}
+
+# Requirements:
+# 1. The output format MUST be exactly identical to full_result.
+# 2. Do not destroy any tags or structural elements; only modify the content within them.
+# 3. Faithfully reproduce the true OCR information as seen in the image. **STRICTLY AVOID** blindly correcting answers to the semantically correct solution (e.g., do not fix the student's math errors).
+# 4. The final output must contain **ONLY** the updated, complete full_result string.
+# """
+
 # 志强测试用例表格使用
 # vision_prompt = """
 # 你是视觉模型的 OCR 校准专家。你的任务是根据题目图片忠实识别学生书写内容，并判断是否需要更新 full_result 中的 <st_answer> 和 <st_final_answer>。
