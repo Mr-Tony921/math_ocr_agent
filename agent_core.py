@@ -1,5 +1,7 @@
+import io
 import os
 import re
+import base64
 from PIL import Image
 from tools.crop_utils import CropTool
 from tools.image_utils import ImageToolbox
@@ -21,11 +23,12 @@ ocr_service = LocalOCRClient()
 grounding_service = GroundingClient()
 gemini_service = GeminiClient()
 
-def run_ocr(image_path):
+def run_ocr(base64_image):
     """
     第一步：加载、增强并执行本地 OCR 识别
     """
-    raw_img = Image.open(image_path)
+    img_data = base64.b64decode(base64_image)
+    raw_img = Image.open(io.BytesIO(img_data))
     enhanced_img = ImageToolbox.internvl_ocr_augment(raw_img)
     
     print(f"[OCR] 发送请求至本地节点...")
@@ -258,15 +261,12 @@ def run_step_completion(enhanced_img, parsed):
     parsed['answer_text'] = final_ans
     return parsed
 
-def run_evaluation(image_path):
+def run_evaluation(base64_image):
     """
     评估主入口
     """
-    if not os.path.exists(image_path):
-        return None
-
     # 1. 基础 OCR
-    enhanced_img, result = run_ocr(image_path)
+    enhanced_img, result = run_ocr(base64_image)
     
     # 2. 深度校验路由
     q_type = result.get('question_type', '')
@@ -292,7 +292,9 @@ if __name__ == "__main__":
             print(f"\n{'='*20} Processing: {filename} {'='*20}")
             
             try:
-                final_parsed_result = run_evaluation(full_path)
+                with(open(full_path, "rb")) as img_f:
+                    img_b64 = base64.b64encode(img_f.read()).decode('utf-8')
+                final_parsed_result = run_evaluation(img_b64)
             except Exception as e:
                 print(f"[Fatal] 文件处理崩溃: {e}")
                 

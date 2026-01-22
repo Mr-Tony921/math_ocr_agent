@@ -1,5 +1,5 @@
 # 本地 OCR (Sensechat VLM 兼容) 配置
-LOCAL_OCR_URL = "http://10.119.22.247:8000/generate"
+LOCAL_OCR_URL = "http://10.119.17.161:8000/generate"
 
 # 本地 Grounding 服务配置
 LOCAL_GROUNDING_URL = "http://10.119.22.254:8888/cut_question"
