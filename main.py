@@ -77,8 +77,7 @@ def run_step_choice(enhanced_img, parsed):
         visual_materials = [enhanced_img]
 
     verify_prompt = CHOICE_VISUAL_VERIFY_PROMPT.format(
-        gemini_solve_res=gemini_solve_res,
-        ocr_answer=ocr_answer
+        gemini_solve_res=gemini_solve_res
     )
     
     try:
@@ -272,16 +271,15 @@ def run_evaluation(image_path):
     # 2. 深度校验路由
     q_type = result.get('question_type', '')
     if q_type == "选择题":
-        pass
         result = run_step_choice(enhanced_img, result)
     elif q_type == "填空题":
         result = run_step_completion(enhanced_img, result)
     
     print(f"[Final] 判定答案: {result['final_answer']}")
-    return result
+    return f"<st_question>{result['question_text']}</st_question>\n<st_question_id>{result['question_id']}</st_question_id>\n<st_question_type>{result['question_type']}</st_question_type>\n<st_answer>{result['answer_text']}</st_answer>\n<st_final_answer>{result['final_answer']}</st_final_answer>"
 
 if __name__ == "__main__":
-    # test_file = "/mnt/afs/tongronglei/code/judge_data/test_ocr/fuduji/img_v3_02u6_37aeefe9-8b0f-44ad-b1e5-d03c95ee192g.png"
+    # test_file = "/mnt/afs/tongronglei/code/judge_data/test_ocr/tmp/17-94adb5c7-7c32-469e-9901-57d8010a4eb8.jpeg"
     # final_parsed_result = run_evaluation(test_file)
 
     images_path = "/mnt/afs/tongronglei/code/judge_data/test_ocr/tmp"
