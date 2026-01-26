@@ -32,7 +32,7 @@ def call_exam_agent(img_path, url):
 
 def main():
     # --- 配置区 ---
-    SERVER_URL = "http://10.120.1.3:8888/evaluate"
+    SERVER_URL = "http://10.120.7.8:8888/evaluate"
     IMG_DIR = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/test_ocr/tmp"
     CONCURRENT_THREADS = 4
     

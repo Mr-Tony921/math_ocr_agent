@@ -1,10 +1,10 @@
 import os
 
 # 本地 OCR (Sensechat VLM 兼容) 配置
-LOCAL_OCR_URL = "http://10.120.2.31:8000/generate"
+LOCAL_OCR_URL = "http://10.120.7.6:8000/generate"
 
 # 本地 Grounding 服务配置
-LOCAL_GROUNDING_URL = "http://10.120.5.92:8888/cut_question"
+LOCAL_GROUNDING_URL = "http://10.120.2.61:8888/cut_question"
 
 # Gemini API 配置
 GEMINI_API_KEY = 'sk-nz9CAzZK3q9F7Ofk2FbL6bBnB9v80VyKoY7lHoczPJo0f7eo'

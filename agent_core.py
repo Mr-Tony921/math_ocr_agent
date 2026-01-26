@@ -225,20 +225,20 @@ def run_evaluation(base64_image):
             f"<st_final_answer>{result.get('final_answer','')}</st_final_answer>")
 
 if __name__ == "__main__":
-    images_path = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/test_ocr/fuduji"
-    if os.path.exists(images_path):
-        sample_files = [f for f in os.listdir(images_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-        for filename in sample_files:
-            print(f"\n{'='*20} Processing: {filename} {'='*20}")
-            try:
-                with open(os.path.join(images_path, filename), "rb") as img_f:
-                    img_b64 = base64.b64encode(img_f.read()).decode('utf-8')
-                run_evaluation(img_b64)
-            except Exception as e:
-                print(f"[Fatal] {e}")
-            print("-" * 60)
+    # images_path = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/test_ocr/fuduji"
+    # if os.path.exists(images_path):
+    #     sample_files = [f for f in os.listdir(images_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    #     for filename in sample_files:
+    #         print(f"\n{'='*20} Processing: {filename} {'='*20}")
+    #         try:
+    #             with open(os.path.join(images_path, filename), "rb") as img_f:
+    #                 img_b64 = base64.b64encode(img_f.read()).decode('utf-8')
+    #             run_evaluation(img_b64)
+    #         except Exception as e:
+    #             print(f"[Fatal] {e}")
+    #         print("-" * 60)
 
-    # filename = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/test_ocr/tmp/11-522417e5-78e1-43c7-b972-49a3d607e008.jpeg"
-    # with open(filename, "rb") as img_f:
-    #     img_b64 = base64.b64encode(img_f.read()).decode('utf-8')
-    #     run_evaluation(img_b64)
+    filename = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/test_ocr/tmp/11-522417e5-78e1-43c7-b972-49a3d607e008.jpeg"
+    with open(filename, "rb") as img_f:
+        img_b64 = base64.b64encode(img_f.read()).decode('utf-8')
+        run_evaluation(img_b64)
