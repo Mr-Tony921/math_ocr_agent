@@ -88,7 +88,7 @@ class GeminiClientV2:
                 headers=self.headers,
                 data=json.dumps(request_data),
                 proxies=self.proxies, # 关键：添加代理
-                timeout=180
+                timeout=1800
             )
 
             if response.status_code == 200:

@@ -34,7 +34,8 @@ def _safe_split_answers(text):
     """初步分割 OCR 结果"""
     if not text: return []
     normalized = text.replace('；', ';')
-    return [x.strip() for x in normalized.split(';') if x.strip()]
+    normalized = text.replace('""', '')
+    return [x.strip() for x in normalized.split(';')]
 
 def _safe_join_answers(parts):
     """组装最终输出字符串"""
@@ -239,7 +240,7 @@ if __name__ == "__main__":
     #             print(f"[Fatal] {e}")
     #         print("-" * 60)
 
-    filename = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/test_ocr/tmp/11-522417e5-78e1-43c7-b972-49a3d607e008.jpeg"
+    filename = "/mnt/afs_ocr/tongronglei/workspace/mathocr/2_eval/img_v3_02ub_2c920cb5-ac07-4b56-b979-b12db549066g.png"
     with open(filename, "rb") as img_f:
         img_b64 = base64.b64encode(img_f.read()).decode('utf-8')
         run_evaluation(img_b64)
