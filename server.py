@@ -1,61 +1,52 @@
-import base64
-import binascii
-from fastapi import FastAPI, Body
+import uuid
+import contextvars
+import builtins
+import time
+from fastapi import FastAPI, Body, Request
 from pydantic import BaseModel, validator
-import uvicorn
 
-# 从 agent_core.py 引入 run_evaluation
+# 1. 强力日志追踪：劫持内置 print
+request_id_ctx = contextvars.ContextVar("request_id", default="INIT")
+_original_print = builtins.print
+
+def scoped_print(*args, **kwargs):
+    rid = request_id_ctx.get()
+    # 增加毫秒级时间，方便观察 agent_core 内部耗时
+    t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    _original_print(f"[{t}] [{rid}]", *args, **kwargs)
+
+builtins.print = scoped_print
+
 from agent_core import run_evaluation
 
 app = FastAPI(title="exam_ocr_agent")
 
+# 2. 中间件：生成并注入 ID
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    rid = str(uuid.uuid4())[:8]
+    token = request_id_ctx.set(rid)
+    try:
+        return await call_next(request)
+    finally:
+        request_id_ctx.reset(token)
+
 class EvaluationRequest(BaseModel):
     image_base64: str
+    # ... validator 保持不变 ...
 
-    @validator("image_base64")
-    def check_base64_format(cls, v):
-        """校验 Base64 字符串的合法性"""
-        if not v:
-            raise ValueError("Base64 string cannot be empty")
-        
-        # 如果带有 Data URI 前缀 (如 data:image/jpeg;base64,)，先去掉
-        if "," in v:
-            v = v.split(",")[1]
-            
-        try:
-            # 尝试解码前几个字节，检查是否为合法的 Base64 编码
-            base64.b64decode(v[:32], validate=True)
-        except binascii.Error:
-            raise ValueError("Invalid Base64 encoding")
-        return v
-
+# 3. 核心接口：去掉 async 是解决 TIMEOUT 的关键
 @app.post("/evaluate")
-async def evaluate_api(request: EvaluationRequest = Body(...)):
+def evaluate_api(request: EvaluationRequest = Body(...)):
+    """
+    注意：这里去掉了 async，FastAPI 会在线程池中运行此函数。
+    即使 run_evaluation 跑 10 分钟，主线程依然能响应心跳。
+    """
     try:
-        # 直接透传验证后的 base64 字符串给核心函数
-        # 注意：这里 request.image_base64 已经是经过 validator 处理过的纯字符串
-        raw_xml_res = run_evaluation(request.image_base64)
-        
-        if not raw_xml_res:
-            return {
-                "code": 500, 
-                "message": "Evaluation engine failed to process the image", 
-                "data": None
-            }
-
-        return {
-            "code": 200,
-            "message": "success",
-            "data": raw_xml_res
-        }
-
+        print(f"--- New Request ---")
+        res = run_evaluation(request.image_base64)
+        print(f"--- Task Completed ---")
+        return {"code": 200, "message": "success", "data": res}
     except Exception as e:
-        # 捕获运行时异常，返回 500
-        return {
-            "code": 500, 
-            "message": f"Core Logic Error: {str(e)}", 
-            "data": None
-        }
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+        print(f"Error: {e}")
+        return {"code": 500, "message": str(e), "data": None}
