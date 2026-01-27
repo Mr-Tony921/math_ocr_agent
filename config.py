@@ -11,6 +11,9 @@ GEMINI_API_KEY = 'sk-nz9CAzZK3q9F7Ofk2FbL6bBnB9v80VyKoY7lHoczPJo0f7eo'
 GEMINI_API_URL = 'https://api.ppchat.vip/v1beta/models/gemini-3-pro-preview:generateContent'
 SITE_TOTAL_ID = 'd011e11efbb1a4bf9163830b0f22e8e7'
 
+GEMINI_API_KEY_V2 = 'AQ.Ab8RN6KwX_wmOuLSMEoZ01hGbYyR9l6GTaeTIPcua8odwhiOXA'
+PROXY_URL = "http://sysagent:c08400bf@10.119.176.202:3128"
+
 # 业务题型配置
 TARGET_TYPES = ["选择题", "填空题"]
 

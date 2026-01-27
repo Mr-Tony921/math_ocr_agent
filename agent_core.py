@@ -13,7 +13,8 @@ from tools.crop_utils import CropTool
 from tools.image_utils import ImageToolbox
 from tools.ocr_client import LocalOCRClient
 from tools.grounding_client import GroundingClient
-from tools.gemini_client import GeminiClient
+# from tools.gemini_client import GeminiClient
+from tools.gemini_client_v2 import GeminiClientV2 as GeminiClient
 from tools.logic_solver import LogicSolver
 
 # --- 导入 Prompt ---
