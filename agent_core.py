@@ -213,7 +213,7 @@ def run_evaluation(base64_image):
     q_type = result.get('question_type', '')
     if q_type == "选择题":
         result = run_step_choice(enhanced_img, result, local_logic_solver, local_gemini_service, local_grounding_service)
-    elif q_type == "填空题":
+    elif q_type == "填空题" or q_type == "小学口算题":
         result = run_step_completion(enhanced_img, result, local_logic_solver, local_gemini_service, local_grounding_service)
     
     print(f"[Final] 判定答案: {result['final_answer']}")
